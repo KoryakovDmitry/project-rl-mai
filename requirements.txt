@@ -1,0 +1,13 @@
+jupyter
+torch
+matplotlib
+tqdm
+IPython
+gymnasium
+stable_baselines3
+black
+gym
+seaborn
+torchtext
+torchsummary
+nbconvert[qtpng]
