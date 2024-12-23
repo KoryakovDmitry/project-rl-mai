@@ -71,7 +71,7 @@ def rewards_plot(train_rewards, val_rewards, save=False, path=None):
         ax.set_title('episode: {}, \nlast total reward: {:.3f}%'.format(
             episode, rewards[-1] * 100
         ))
-        ax.plot(rewards, color=color, lw=3, label=label, marker='0', markerfacecolor='white')
+        ax.plot(rewards, color=color, lw=3, label=label, marker='*', markerfacecolor='white')
         ax.grid(True)
         ax.legend()
         ax.set_xlabel('epoch')
