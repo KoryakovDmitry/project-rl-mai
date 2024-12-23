@@ -14,7 +14,7 @@ def fit_agent(agent, env_stock_train, stock_list, w_size=50):
         size=w_size
     )
     state_normalized = stock_window.normalize(stock_window.get_values())
-    print('state shape:', np.array(state_normalized).shape)
+    # print('state shape:', np.array(state_normalized).shape)
 
     while True:
         action = list(agent.get_action(state_normalized))
@@ -27,7 +27,7 @@ def fit_agent(agent, env_stock_train, stock_list, w_size=50):
         agent.fit(state_normalized, action, reward, done, next_state_normalized)
 
         if terminal or done:
-            print('break')
+            # print('break')
             break
         state_normalized = next_state_normalized
 
