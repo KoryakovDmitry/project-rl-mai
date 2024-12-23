@@ -16,7 +16,6 @@ def fit_agent(agent, env_stock_train, stock_list, w_size=50):
     state_normalized = stock_window.normalize(stock_window.get_values())
     # print('state shape:', np.array(state_normalized).shape)
 
-    i = 0
     while True:
         action = list(agent.get_action(state_normalized))
         next_state, reward, terminal, done, _, _ = env_stock_train.step(action)
@@ -26,12 +25,6 @@ def fit_agent(agent, env_stock_train, stock_list, w_size=50):
         stock_window.push(price)
         next_state_normalized = stock_window.normalize(stock_window.get_values())
         agent.fit(state_normalized, action, reward, done, next_state_normalized)
-
-        if 1000 == i:
-            print(f"1000 == i")
-            break
-
-        i += 1
 
         if terminal or done:
 
