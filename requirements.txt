@@ -1,5 +1,5 @@
 jupyter
-torch
+#torch
 matplotlib
 tqdm
 IPython
