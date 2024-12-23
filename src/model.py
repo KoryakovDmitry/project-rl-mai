@@ -248,8 +248,8 @@ class DDPG:
 
     def save(self, dir="DDPG_agent"):
         print(os.path.join(os.getcwd(), dir, f"pi_model.pkl"))
-        torch.save(self.pi_model.state_dict(), os.path.join(os.getcwd(), dir, f"pi_model.pkl"))
-        torch.save(self.q_model.state_dict(), os.path.join(os.getcwd(), dir, f"q_model.pkl"))
+        # torch.save(self.pi_model.state_dict(), os.path.join(os.getcwd(), dir, f"pi_model.pkl"))
+        # torch.save(self.q_model.state_dict(), os.path.join(os.getcwd(), dir, f"q_model.pkl"))
 
     def load(self, dir):
         if self.kwargs is None:
