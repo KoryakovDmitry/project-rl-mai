@@ -8,6 +8,32 @@ from gym.utils import seeding
 from stable_baselines3.common.vec_env import DummyVecEnv
 
 
+class BufferMultiple:
+    def __init__(self, stock_list, init_values=None, size=30, eps=1e-6):
+        self.size = size
+        self.stock_list = stock_list
+        self.values = [] if init_values is None else list(list(i) for i in init_values[:size])
+        self.eps = eps
+
+    def normalize(self, values):
+        if len(values) > 0:
+            mean = np.mean(values, axis=0)
+            std = np.std(values, axis=0)
+            # print(f"std: {std}, mean: {mean}")
+            return list(list(i) for i in ((np.array(values) - mean) / (std + self.eps)))
+
+    def push(self, values_list):
+        self.values.append(values_list)
+        if len(self.values) > self.size:
+            self.values.pop(0)
+
+    def set_values(self, values):
+        self.values = values
+
+    def get_values(self):
+        return self.values
+
+
 class StockTradingMultipleEnv(gym.Env):
     def __init__(
             self,
