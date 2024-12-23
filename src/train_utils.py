@@ -27,8 +27,8 @@ def fit_agent(agent, env_stock_train, stock_list, w_size=50):
         next_state_normalized = stock_window.normalize(stock_window.get_values())
         agent.fit(state_normalized, action, reward, done, next_state_normalized)
 
-        if 100000 == i:
-            print(f"100000 == i")
+        if 10000 == i:
+            print(f"10000 == i")
             break
 
         i += 1
