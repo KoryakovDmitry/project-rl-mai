@@ -8,6 +8,6 @@ stable_baselines3
 black
 gym
 seaborn
-torchtext
-torchsummary
+#torchtext
+#torchsummary
 nbconvert[qtpng]
