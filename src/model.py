@@ -37,29 +37,34 @@ class CNN2d(nn.Module):
             nn.MaxPool2d(kernel_size=(1, 3)),
         )
         """
-        self.cnn_2d = nn.Sequential(
-            nn.Conv2d(in_channels=1, out_channels=16, kernel_size=9),
-            nn.ReLU(),
-            nn.Conv2d(in_channels=16, out_channels=32, kernel_size=7),
-            nn.ReLU(),
-            nn.Conv2d(in_channels=32, out_channels=64, kernel_size=5),
-            nn.ReLU(),
-            nn.MaxPool2d(kernel_size=(1, 2)),
-            nn.Conv2d(in_channels=64, out_channels=128, kernel_size=5),
-            nn.ReLU(),
-            nn.Conv2d(in_channels=128, out_channels=128, kernel_size=2),
-            nn.ReLU(),
-        )
+        # self.cnn_2d = nn.Sequential(
+        #     nn.Conv2d(in_channels=1, out_channels=16, kernel_size=9),
+        #     nn.ReLU(),
+        #     nn.Conv2d(in_channels=16, out_channels=32, kernel_size=7),
+        #     nn.ReLU(),
+        #     nn.Conv2d(in_channels=32, out_channels=64, kernel_size=5),
+        #     nn.ReLU(),
+        #     nn.MaxPool2d(kernel_size=(1, 2)),
+        #     nn.Conv2d(in_channels=64, out_channels=128, kernel_size=5),
+        #     nn.ReLU(),
+        #     nn.Conv2d(in_channels=128, out_channels=128, kernel_size=2),
+        #     nn.ReLU(),
+        # )
 
         self.cnn_1d = nn.Sequential(
-            nn.Conv1d(in_channels=128, out_channels=64, kernel_size=3),
+            nn.Conv1d(in_channels=input_dim, out_channels=out_channels[0], kernel_size=3, padding='same'),
+            nn.ReLU(),
+            nn.Conv1d(in_channels=out_channels[0], out_channels=out_channels[1], kernel_size=3, padding='same'),
+            nn.ReLU(),
+            nn.Conv1d(in_channels=out_channels[1], out_channels=out_channels[2], kernel_size=3, padding='same'),
             nn.ReLU(),
         )
 
         self.flatten = nn.Flatten()
 
         self.modules_cnn = nn.ModuleList()
-        prev = (input_dim - (8 + 6 + 4 + 4 + 1) - (2)) * 64  # 64 * 11 #out_channels * (input_dim - (kernel_size - 1))
+        # prev = (input_dim - (8 + 6 + 4 + 4 + 1) - (2)) * 64  # 64 * 11 #out_channels * (input_dim - (kernel_size - 1))
+        prev = out_channels[2]
         if stack_info:  # доп информация о числе акций и размере портфеля
             self.modules_cnn.append(nn.Linear(prev + output_dim * 2, prev))
             self.modules_cnn.append(nn.ReLU())
@@ -72,13 +77,22 @@ class CNN2d(nn.Module):
         self.tanh = nn.Tanh() if is_tanh else None
 
     def forward(self, x, num_stocks=None, hmax=None, stock_prices=None, balance=None):
-        unsqueeze_dim = 1 if len(x.shape) > 2 else 0
+        # unsqueeze_dim = 1 if len(x.shape) > 2 else 0
         # x = self.cnn_layers(x.unsqueeze(unsqueeze_dim)).unsqueeze(unsqueeze_dim)
-        x = self.cnn_2d(x.unsqueeze(unsqueeze_dim)).squeeze()
-        # print('shhape:', x.shape)
-        x = self.cnn_1d(x).unsqueeze(unsqueeze_dim)
-        # print('shhape:', x.shape)
-        x = self.flatten(x)
+        # print('1shhape:', x.shape)
+        if len(x.shape) <= 2:
+            x = x.unsqueeze(0)
+        # x = x.unsqueeze(unsqueeze_dim)
+        # print('2shhape:', x.shape)
+        # x = self.cnn_2d(x)
+        # print('3shhape:', x.shape)
+        # x = x.squeeze()
+        # print('4shhape:', x.shape)
+        x = self.cnn_1d(x)
+        # x = x.unsqueeze(unsqueeze_dim)
+        # print('5shhape:', x.shape)
+        # x = self.flatten(x)
+        # print('6shhape:', x.shape)
         if self.stack_info:
             batch_size, _ = x.shape
             x = torch.cat([
@@ -88,16 +102,17 @@ class CNN2d(nn.Module):
                                                                                                 len(stock_prices))
             ], dim=1)
 
+        x = x.transpose(1, 2);
+        # print('7shhape:', x.shape)
         for module in self.modules_cnn:
+            # print('cnn shhape:', x.shape)
             x = module(x)
 
         if self.tanh:
             x = self.tanh(x)
-
-        if len(x) > 2:
-            return x
-        else:
-            return x.squeeze()
+        # print('7shhape:', x.shape)
+        x = x.mean(dim=1)
+        return x
 
 
 import numpy as np
@@ -218,10 +233,11 @@ class DDPG:
 
             pred_next_actions = self.action_max * self.pi_target_model(next_states)
             # print(next_states.shape, pred_next_actions.shape)
-            if self.multiple_stocks:
-                pred_next_actions = pred_next_actions.unsqueeze(1)
+            # if self.multiple_stocks:
+                # pred_next_actions = pred_next_actions.unsqueeze(1)
+            # print("ddd", next_states.shape, pred_next_actions.unsqueeze(dim=1).shape)
             next_states_and_pred_next_actions = torch.cat(
-                (next_states, pred_next_actions), dim=1
+                (next_states, pred_next_actions.unsqueeze(dim=1)), dim=1
             )
             targets = rewards + self.gamma * (1 - dones) * self.q_target_model(
                 next_states_and_pred_next_actions
@@ -240,6 +256,7 @@ class DDPG:
             pred_actions = self.action_max * self.pi_model(states)
             if self.multiple_stocks:
                 pred_actions = pred_actions.unsqueeze(1)
+            # print('sss', states.shape, pred_actions.shape)
             states_and_pred_actions = torch.cat((states, pred_actions), dim=1)
             pi_loss = -torch.mean(self.q_model(states_and_pred_actions))
             self.update_target_model(

@@ -9,7 +9,7 @@ from stable_baselines3.common.vec_env import DummyVecEnv
 
 
 class BufferMultiple:
-    def __init__(self, stock_list, init_values=None, size=30, eps=1e-6):
+    def __init__(self, stock_list, init_values=None, size=10000, eps=1e-6):
         self.size = size
         self.stock_list = stock_list
         self.values = [] if init_values is None else list(list(i) for i in init_values[:size])
@@ -118,7 +118,8 @@ class StockTradingMultipleEnv(gym.Env):
             # self._make_plot()
             pass
         else:
-            assert len(actions) == len(self.stock_list), "not enough actions"
+                
+            assert len(actions) == len(self.stock_list), f"not enough actions actions={len(actions)}, self.stock_list={len(self.stock_list)}"
             actions = np.array(
                 [
                     int(np.clip(action * self.hmax, -self.hmax, self.hmax))
