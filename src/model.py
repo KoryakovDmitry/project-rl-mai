@@ -5,6 +5,9 @@ import numpy as np
 import torch
 import torch.nn as nn
 
+import random
+from copy import deepcopy
+from collections import deque
 from .utils import num_scale
 
 
@@ -114,14 +117,6 @@ class CNN2d(nn.Module):
         x = x.mean(dim=1)
         return x
 
-
-import numpy as np
-import torch
-import torch.nn as nn
-
-import random
-from copy import deepcopy
-from collections import deque
 
 
 # Ornstein–Uhlenbeck process (Процесс Орнштейна – Уленбека)
